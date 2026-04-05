@@ -1,0 +1,1683 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La tua città ideale</title>
+  <style>
+    :root {
+      --bg: #f6efe3;
+      --bg-strong: #f1e3ce;
+      --panel: rgba(255, 251, 245, 0.78);
+      --panel-strong: rgba(255, 251, 245, 0.92);
+      --ink: #1e2320;
+      --muted: #5d635f;
+      --line: rgba(46, 57, 52, 0.12);
+      --accent: #0f766e;
+      --accent-2: #c45d2e;
+      --accent-soft: rgba(15, 118, 110, 0.14);
+      --danger-soft: rgba(196, 93, 46, 0.12);
+      --shadow: 0 24px 60px rgba(66, 49, 22, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 32%),
+        radial-gradient(circle at right 10% top 15%, rgba(196, 93, 46, 0.16), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+      color: var(--ink);
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 70%);
+    }
+
+    .shell {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(520px, 680px) minmax(0, 1fr);
+      gap: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 28px;
+      min-height: 100vh;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+    }
+
+    .controls {
+      padding: 24px;
+      min-height: calc(100vh - 56px);
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    .results {
+      padding: 24px;
+      min-height: calc(100vh - 56px);
+      max-height: calc(100vh - 56px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      display: grid;
+      gap: 18px;
+      grid-template-rows: auto auto auto 1fr;
+    }
+
+    .hero,
+    .section-card,
+    .ranking-card {
+      background: var(--panel-strong);
+      border: 1px solid rgba(60, 58, 47, 0.08);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--accent);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      font-weight: 700;
+      line-height: 0.95;
+    }
+
+    h1 {
+      font-size: clamp(2.6rem, 4vw, 4.6rem);
+      max-width: 11ch;
+    }
+
+    h2 {
+      font-size: clamp(2.9rem, 7vw, 6rem);
+    }
+
+    h3 {
+      font-size: 1.4rem;
+      line-height: 1.1;
+    }
+
+    p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hero-copy {
+      display: grid;
+      gap: 12px;
+    }
+
+    .control-stack {
+      display: grid;
+      gap: 14px;
+      margin: 18px 0 20px;
+    }
+
+    .info-box,
+    .toolbar {
+      display: grid;
+      gap: 12px;
+      padding: 18px;
+      background: #f8f0e4;
+      border: 1px solid rgba(88, 74, 49, 0.1);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 24px rgba(69, 51, 24, 0.08);
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .data-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .data-item {
+      display: grid;
+      gap: 4px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(88, 74, 49, 0.08);
+    }
+
+    .data-label {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .data-value {
+      color: var(--ink);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .data-link {
+      color: var(--accent);
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .data-link:hover {
+      text-decoration: underline;
+    }
+
+    .data-item.actions {
+      align-content: center;
+    }
+
+    .data-item.source {
+      grid-column: 1 / -1;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 10px 14px;
+    }
+
+    .data-item.source .data-label,
+    .data-item.source .data-value {
+      grid-column: 1;
+    }
+
+    .data-item.source .button {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: center;
+    }
+
+    .toolbar-row,
+    .winner-stats,
+    .summary-row,
+    .card-top,
+    .slider-row,
+    .result-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      font: inherit;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input[type="search"]:focus {
+      border-color: rgba(15, 118, 110, 0.35);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    .button,
+    .collapse-toggle {
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .button {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+    }
+
+    .button:hover,
+    .collapse-toggle:hover {
+      transform: translateY(-1px);
+      border-color: rgba(15, 118, 110, 0.26);
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--accent), #12837a);
+      color: #f8fffd;
+      border-color: transparent;
+    }
+
+    .pill,
+    .badge,
+    .city-chip,
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      line-height: 1;
+    }
+
+    .pill,
+    .city-chip {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    .status {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+      align-items: end;
+    }
+
+    .winner-score {
+      display: grid;
+      gap: 12px;
+      justify-items: start;
+      padding: 22px;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.45), transparent 45%),
+        linear-gradient(145deg, #116d66, #0a4f4a);
+      color: #effcf9;
+      min-height: 220px;
+    }
+
+    .winner-score p,
+    .winner-score .muted-light {
+      color: rgba(239, 252, 249, 0.82);
+    }
+
+    .score-number {
+      font-size: clamp(3.4rem, 6vw, 5.8rem);
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      line-height: 0.88;
+    }
+
+    .group-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    details.group {
+      background: rgba(255, 252, 248, 0.9);
+      border: 1px solid rgba(63, 57, 46, 0.1);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    details.group[open] {
+      box-shadow: 0 16px 30px rgba(66, 49, 22, 0.08);
+    }
+
+    summary {
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .collapse-toggle {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 18px 16px;
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid transparent;
+      border-bottom: 1px solid transparent;
+      text-align: left;
+    }
+
+    .collapse-toggle:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 3px rgba(15, 118, 110, 0.14);
+    }
+
+    details[open] .collapse-toggle {
+      border-bottom-color: rgba(63, 57, 46, 0.08);
+    }
+
+    .group-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .indicator-list {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .indicator-card {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.78);
+      border-radius: 16px;
+      border: 1px solid rgba(63, 57, 46, 0.08);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .indicator-card.hidden {
+      display: none;
+    }
+
+    .indicator-card.favorite {
+      background: rgba(255, 247, 231, 0.96);
+      border-color: rgba(196, 93, 46, 0.34);
+      box-shadow: 0 10px 26px rgba(196, 93, 46, 0.12);
+    }
+
+    .indicator-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .indicator-title {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--ink);
+    }
+
+    .indicator-note {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .slider-row {
+      justify-content: space-between;
+    }
+
+    .weight-readout {
+      min-width: 62px;
+      align-self: start;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(196, 93, 46, 0.1);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent-2);
+      font-weight: 700;
+    }
+
+    .favorite-toggle {
+      width: 34px;
+      height: 34px;
+      display: none;
+      place-items: center;
+      padding: 0;
+      border-radius: 999px;
+      border: 1px solid rgba(196, 93, 46, 0.18);
+      background: rgba(255, 255, 255, 0.82);
+      color: rgba(196, 93, 46, 0.75);
+      font-size: 1.05rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .favorite-toggle:hover {
+      transform: translateY(-1px);
+      border-color: rgba(196, 93, 46, 0.36);
+    }
+
+    .favorite-toggle.active {
+      background: rgba(196, 93, 46, 0.14);
+      border-color: rgba(196, 93, 46, 0.42);
+      color: var(--accent-2);
+    }
+
+    .favorite-toggle:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(196, 93, 46, 0.14);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      --fill-percent: 50%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    input[type="range"].favorite-slider:disabled {
+      opacity: 0.9;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        var(--accent-2) 0,
+        var(--accent-2) var(--fill-percent),
+        rgba(196, 93, 46, 0.12) var(--fill-percent),
+        rgba(196, 93, 46, 0.12) 100%
+      );
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: -5px;
+      border-radius: 50%;
+      border: 2px solid #fffaf4;
+      background: var(--accent-2);
+      box-shadow: 0 2px 8px rgba(69, 51, 24, 0.22);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(196, 93, 46, 0.12);
+    }
+
+    input[type="range"]::-moz-range-progress {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent-2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #fffaf4;
+      border-radius: 50%;
+      background: var(--accent-2);
+      box-shadow: 0 2px 8px rgba(69, 51, 24, 0.22);
+    }
+
+    .empty-state {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px dashed rgba(63, 57, 46, 0.18);
+      color: var(--muted);
+    }
+
+    .summary-grid,
+    .rank-list,
+    .chip-list,
+    .contributors {
+      display: grid;
+      gap: 12px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .metric-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(63, 57, 46, 0.08);
+    }
+
+    .metric-box strong {
+      display: block;
+      font-size: 1.8rem;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      line-height: 1;
+      margin-bottom: 6px;
+      color: var(--ink);
+    }
+
+    .contributors {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .contributor {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(15, 118, 110, 0.06);
+      border: 1px solid rgba(15, 118, 110, 0.12);
+    }
+
+    .contributor strong,
+    .rank-name {
+      display: block;
+      color: var(--ink);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .contributor small,
+    .rank-meta {
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .rank-item {
+      display: grid;
+      gap: 8px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid rgba(63, 57, 46, 0.08);
+    }
+
+    .rank-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .rank-bar {
+      position: relative;
+      height: 10px;
+      background: rgba(15, 118, 110, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .rank-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      background: linear-gradient(-90deg, var(--accent), var(--accent-2));
+      border-radius: inherit;
+    }
+
+    .mono {
+      font-variant-numeric: tabular-nums;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 1080px) {
+      .shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .controls,
+      .results {
+        min-height: auto;
+        max-height: none;
+        overflow: visible;
+      }
+
+      .toolbar {
+        position: static;
+      }
+
+      .data-grid,
+      .hero-grid,
+      .summary-grid,
+      .contributors {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .controls,
+      .results {
+        padding: 16px;
+      }
+
+      .toolbar {
+        padding: 14px;
+      }
+
+      .button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .toolbar-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .contributors {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="panel controls">
+      <div class="hero-copy">
+        <p class="eyebrow">Questionario personalizzato</p>
+        <h1>La tua città ideale</h1>
+        <p>
+          Regola il peso di ogni indicatore da 0 a 10 e lascia che il ranking trovi la provincia italiana più adatta alle tue priorità.
+        </p>
+      </div>
+
+      <div class="control-stack">
+        <div class="info-box">
+          <div class="summary-row">
+            <span class="pill">Dati</span>
+            <p class="muted">Informazioni sulla base dati caricata nella pagina.</p>
+          </div>
+          <div class="data-grid">
+            <div class="data-item">
+              <span class="data-label">Edizione</span>
+              <span class="data-value mono" id="dataYear">-</span>
+            </div>
+            <div class="data-item">
+              <span class="data-label">Città</span>
+              <span class="data-value mono" id="dataCities">-</span>
+            </div>
+            <div class="data-item">
+              <span class="data-label">Indicatori</span>
+              <span class="data-value mono" id="dataIndicators">-</span>
+            </div>
+            <div class="data-item">
+              <span class="data-label">Stato</span>
+              <span class="data-value" id="loadStatus">Caricamento...</span>
+            </div>
+            <div class="data-item source">
+              <span class="data-label">CSV sorgente</span>
+              <a class="data-value data-link" id="csvLink" href="#" target="_blank" rel="noreferrer">In attesa del link</a>
+              <button class="button primary" id="refreshButton">Aggiorna dati</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <input id="searchInput" type="search" placeholder="Cerca un indicatore, ad esempio donne, pil, sicurezza...">
+          <div class="toolbar-row">
+            <button class="button" data-preset-weight="0">Tutti a 0</button>
+            <button class="button" data-preset-weight="5">Tutti a 5</button>
+            <button class="button" data-preset-weight="10">Tutti a 10</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="groupList" class="group-list"></div>
+    </section>
+
+    <section class="panel results">
+      <div class="hero" id="heroCard">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">La tua citta perfetta</p>
+            <h2 id="winnerName">Sto preparando il ranking...</h2>
+            <p id="winnerSubtitle">Appena il dataset e pronto, combino i tuoi pesi per trovare la citta che massimizza la compatibilita.</p>
+            <div class="winner-stats" id="winnerTags"></div>
+          </div>
+          <div class="winner-score">
+            <span class="badge">Compatibilita</span>
+            <div class="score-number mono" id="winnerScore">--</div>
+            <p class="muted-light" id="winnerScoreLabel">Attendo almeno un indicatore attivo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-grid" id="summaryGrid">
+        <div class="metric-box">
+          <strong class="mono" id="activeIndicatorsCount">0</strong>
+          <span class="muted">Indicatori pesati sopra zero</span>
+        </div>
+        <div class="metric-box">
+          <strong class="mono" id="citiesCount">0</strong>
+          <span class="muted">Citta confrontate</span>
+        </div>
+        <div class="metric-box">
+          <strong class="mono" id="indicatorsCount">0</strong>
+          <span class="muted">Indicatori disponibili</span>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="summary-row">
+          <span class="pill">Motivi principali</span>
+          <p class="muted">Gli indicatori che hanno spinto di piu la prima classificata, dati i pesi attuali.</p>
+        </div>
+        <div class="contributors" id="contributors"></div>
+      </div>
+
+      <div class="ranking-card">
+        <div class="summary-row">
+          <span class="pill">Classifica</span>
+          <p class="muted">Le migliori citta in base alla tua funzione obiettivo personalizzata.</p>
+        </div>
+        <div class="rank-list" id="rankList"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const GITHUB_CONTENTS_TEMPLATE = 'https://api.github.com/repos/IlSole24ORE/QDV{year}/contents/';
+    const RAW_CSV_TEMPLATE = 'https://raw.githubusercontent.com/IlSole24ORE/QDV{year}/refs/heads/main/{fileName}';
+    const CACHE_KEY = 'qdv2025.csv.raw';
+    const CACHE_TIME_KEY = 'qdv2025.csv.timestamp';
+    const CACHE_URL_KEY = 'qdv2025.csv.source-url';
+    const PREFS_KEY = 'qdv2025.preferences';
+    const GROUP_STATE_KEY = 'qdv2025.group-state';
+    const CACHE_TTL = 24 * 60 * 60 * 1000;
+
+    const state = {
+      indicators: [],
+      cityScores: [],
+      cities: [],
+      search: '',
+      ready: false,
+      lastSource: 'network',
+      sourceYear: null,
+      sourceUrl: null,
+    };
+
+    const elements = {
+      searchInput: document.getElementById('searchInput'),
+      groupList: document.getElementById('groupList'),
+      dataYear: document.getElementById('dataYear'),
+      dataCities: document.getElementById('dataCities'),
+      dataIndicators: document.getElementById('dataIndicators'),
+      loadStatus: document.getElementById('loadStatus'),
+      csvLink: document.getElementById('csvLink'),
+      refreshButton: document.getElementById('refreshButton'),
+      winnerName: document.getElementById('winnerName'),
+      winnerSubtitle: document.getElementById('winnerSubtitle'),
+      winnerScore: document.getElementById('winnerScore'),
+      winnerScoreLabel: document.getElementById('winnerScoreLabel'),
+      winnerTags: document.getElementById('winnerTags'),
+      activeIndicatorsCount: document.getElementById('activeIndicatorsCount'),
+      citiesCount: document.getElementById('citiesCount'),
+      indicatorsCount: document.getElementById('indicatorsCount'),
+      contributors: document.getElementById('contributors'),
+      rankList: document.getElementById('rankList'),
+    };
+
+    const GROUP_ORDER = [
+      'Economia e lavoro',
+      'Casa e costo della vita',
+      'Salute e welfare',
+      'Ambiente e territorio',
+      'Sicurezza e giustizia',
+      'Cultura e tempo libero',
+      'Demografia e societa',
+      'Istituzioni e servizi',
+      'Altro',
+    ];
+
+    const REGION_BY_CITY = {
+      'Agrigento': 'Sicilia',
+      'Alessandria': 'Piemonte',
+      'Ancona': 'Marche',
+      'Aosta': 'Valle d\'Aosta',
+      'Arezzo': 'Toscana',
+      'Ascoli Piceno': 'Marche',
+      'Asti': 'Piemonte',
+      'Avellino': 'Campania',
+      'Bari': 'Puglia',
+      'Barletta-Andria-Trani': 'Puglia',
+      'Belluno': 'Veneto',
+      'Benevento': 'Campania',
+      'Bergamo': 'Lombardia',
+      'Biella': 'Piemonte',
+      'Bologna': 'Emilia-Romagna',
+      'Bolzano': 'Trentino-Alto Adige',
+      'Brescia': 'Lombardia',
+      'Brindisi': 'Puglia',
+      'Cagliari': 'Sardegna',
+      'Caltanissetta': 'Sicilia',
+      'Campobasso': 'Molise',
+      'Caserta': 'Campania',
+      'Catania': 'Sicilia',
+      'Catanzaro': 'Calabria',
+      'Chieti': 'Abruzzo',
+      'Como': 'Lombardia',
+      'Cosenza': 'Calabria',
+      'Cremona': 'Lombardia',
+      'Crotone': 'Calabria',
+      'Cuneo': 'Piemonte',
+      'Enna': 'Sicilia',
+      'Ferrara': 'Emilia-Romagna',
+      'Fermo': 'Marche',
+      'Firenze': 'Toscana',
+      'Foggia': 'Puglia',
+      'Forlì-Cesena': 'Emilia-Romagna',
+      'Frosinone': 'Lazio',
+      'Genova': 'Liguria',
+      'Gorizia': 'Friuli Venezia Giulia',
+      'Grosseto': 'Toscana',
+      'Imperia': 'Liguria',
+      'Isernia': 'Molise',
+      'L\'Aquila': 'Abruzzo',
+      'La Spezia': 'Liguria',
+      'Latina': 'Lazio',
+      'Lecce': 'Puglia',
+      'Lecco': 'Lombardia',
+      'Livorno': 'Toscana',
+      'Lodi': 'Lombardia',
+      'Lucca': 'Toscana',
+      'Macerata': 'Marche',
+      'Mantova': 'Lombardia',
+      'Massa-Carrara': 'Toscana',
+      'Matera': 'Basilicata',
+      'Messina': 'Sicilia',
+      'Milano': 'Lombardia',
+      'Modena': 'Emilia-Romagna',
+      'Monza e Brianza': 'Lombardia',
+      'Napoli': 'Campania',
+      'Novara': 'Piemonte',
+      'Nuoro': 'Sardegna',
+      'Oristano': 'Sardegna',
+      'Padova': 'Veneto',
+      'Palermo': 'Sicilia',
+      'Parma': 'Emilia-Romagna',
+      'Pavia': 'Lombardia',
+      'Perugia': 'Umbria',
+      'Pescara': 'Abruzzo',
+      'Pesaro e Urbino': 'Marche',
+      'Piacenza': 'Emilia-Romagna',
+      'Pisa': 'Toscana',
+      'Pistoia': 'Toscana',
+      'Pordenone': 'Friuli Venezia Giulia',
+      'Potenza': 'Basilicata',
+      'Prato': 'Toscana',
+      'Ragusa': 'Sicilia',
+      'Ravenna': 'Emilia-Romagna',
+      'Reggio Calabria': 'Calabria',
+      'Reggio Emilia': 'Emilia-Romagna',
+      'Rieti': 'Lazio',
+      'Rimini': 'Emilia-Romagna',
+      'Roma': 'Lazio',
+      'Rovigo': 'Veneto',
+      'Salerno': 'Campania',
+      'Sassari': 'Sardegna',
+      'Savona': 'Liguria',
+      'Siena': 'Toscana',
+      'Siracusa': 'Sicilia',
+      'Sondrio': 'Lombardia',
+      'Sud Sardegna': 'Sardegna',
+      'Taranto': 'Puglia',
+      'Teramo': 'Abruzzo',
+      'Terni': 'Umbria',
+      'Torino': 'Piemonte',
+      'Trapani': 'Sicilia',
+      'Trento': 'Trentino-Alto Adige',
+      'Treviso': 'Veneto',
+      'Trieste': 'Friuli Venezia Giulia',
+      'Udine': 'Friuli Venezia Giulia',
+      'Valle d\'Aosta/Vallée d\'Aoste': 'Valle d\'Aosta',
+      'Varese': 'Lombardia',
+      'Venezia': 'Veneto',
+      'Verbano-Cusio-Ossola': 'Piemonte',
+      'Vercelli': 'Piemonte',
+      'Verona': 'Veneto',
+      'Vibo Valentia': 'Calabria',
+      'Vicenza': 'Veneto',
+      'Viterbo': 'Lazio'
+    };
+
+    const REGIONS = [
+      'Abruzzo',
+      'Basilicata',
+      'Calabria',
+      'Campania',
+      'Emilia-Romagna',
+      'Friuli Venezia Giulia',
+      'Lazio',
+      'Liguria',
+      'Lombardia',
+      'Marche',
+      'Molise',
+      'Piemonte',
+      'Puglia',
+      'Sardegna',
+      'Sicilia',
+      'Toscana',
+      'Trentino-Alto Adige',
+      'Umbria',
+      'Valle d\'Aosta',
+      'Veneto'
+    ];
+
+    document.querySelectorAll('[data-preset-weight]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const weight = Number(button.dataset.presetWeight);
+        applyPresetWeight(weight);
+      });
+    });
+
+    elements.searchInput.addEventListener('input', (event) => {
+      state.search = event.target.value.trim().toLowerCase();
+      applySearchFilter();
+    });
+
+    elements.refreshButton.addEventListener('click', () => {
+      loadDataset(true);
+    });
+
+    init();
+
+    async function init() {
+      try {
+        await loadDataset(false);
+      } catch (error) {
+        console.error(error);
+        elements.loadStatus.textContent = 'Errore nel caricamento';
+        elements.dataYear.textContent = '-';
+        elements.winnerName.textContent = 'Impossibile caricare i dati';
+        elements.winnerSubtitle.textContent = 'Il file remoto non e stato recuperato correttamente.';
+      }
+    }
+
+    async function loadDataset(forceRefresh) {
+      elements.loadStatus.textContent = forceRefresh ? 'Aggiornamento in corso' : 'Caricamento in corso';
+
+      const csvText = await fetchCsvWithCache(forceRefresh);
+      const rows = parseCsv(csvText);
+      buildModel(rows);
+      state.ready = true;
+
+      renderControls();
+      recompute();
+
+      elements.dataYear.textContent = state.sourceYear ? String(state.sourceYear) : '-';
+      elements.dataCities.textContent = String(state.cities.length);
+      elements.dataIndicators.textContent = String(state.indicators.length);
+      elements.loadStatus.textContent = 'Dati pronti';
+      elements.csvLink.href = state.sourceUrl || '#';
+      elements.csvLink.textContent = getFileNameFromUrl(state.sourceUrl);
+      elements.csvLink.title = state.sourceUrl || 'Link non disponibile';
+      elements.citiesCount.textContent = String(state.cities.length);
+      elements.indicatorsCount.textContent = String(state.indicators.length);
+    }
+
+    async function fetchCsvWithCache(forceRefresh) {
+      const cached = safeStorageGet(CACHE_KEY);
+      const cachedTime = Number(safeStorageGet(CACHE_TIME_KEY) || '0');
+      const cachedUrl = safeStorageGet(CACHE_URL_KEY);
+      const freshCache = cached && Date.now() - cachedTime < CACHE_TTL;
+
+      if (!forceRefresh && freshCache) {
+        state.lastSource = 'cache';
+        state.sourceUrl = cachedUrl;
+        state.sourceYear = extractYearFromUrl(cachedUrl);
+        return cached;
+      }
+
+      const resolved = await resolveLatestCsvSource();
+      if (!resolved) {
+        if (cached) {
+          state.lastSource = 'cache-fallback';
+          state.sourceUrl = cachedUrl;
+          state.sourceYear = extractYearFromUrl(cachedUrl);
+          return cached;
+        }
+        throw new Error('Nessun CSV annuale disponibile');
+      }
+
+      const text = await resolved.response.text();
+      state.lastSource = 'network';
+      state.sourceUrl = resolved.url;
+      state.sourceYear = resolved.year;
+      try {
+        safeStorageSet(CACHE_KEY, text);
+        safeStorageSet(CACHE_TIME_KEY, String(Date.now()));
+        safeStorageSet(CACHE_URL_KEY, resolved.url);
+      } catch (error) {
+        console.warn('Persistenza locale non disponibile', error);
+      }
+      return text;
+    }
+
+    async function resolveLatestCsvSource() {
+      const startYear = new Date().getFullYear();
+
+      for (let year = startYear; year >= 2019; year -= 1) {
+        const contentsUrl = GITHUB_CONTENTS_TEMPLATE.replaceAll('{year}', String(year));
+
+        try {
+          const response = await fetch(contentsUrl, {
+            cache: 'no-store',
+            headers: {
+              Accept: 'application/vnd.github+json',
+            },
+          });
+
+          if (!response.ok) {
+            continue;
+          }
+
+          const files = await response.json();
+          if (!Array.isArray(files)) {
+            continue;
+          }
+
+          const csvFile = files
+            .filter((item) => item && item.type === 'file' && typeof item.name === 'string')
+            .filter((item) => item.name.endsWith('.csv') && item.name.includes(`QDV${year}`))
+            .sort((left, right) => right.name.localeCompare(left.name, 'it'))[0];
+
+          if (csvFile) {
+            const url = csvFile.download_url || RAW_CSV_TEMPLATE
+              .replaceAll('{year}', String(year))
+              .replace('{fileName}', csvFile.name);
+            const csvResponse = await fetch(url, { cache: 'no-store' });
+            if (csvResponse.ok) {
+              return { year, url, response: csvResponse };
+            }
+          }
+        } catch (error) {
+          console.warn(`Tentativo fallito per ${year}`, error);
+        }
+      }
+
+      return null;
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let current = '';
+      let row = [];
+      let inQuotes = false;
+
+      for (let index = 0; index < text.length; index += 1) {
+        const char = text[index];
+        const next = text[index + 1];
+
+        if (char === '"') {
+          if (inQuotes && next === '"') {
+            current += '"';
+            index += 1;
+          } else {
+            inQuotes = !inQuotes;
+          }
+          continue;
+        }
+
+        if (char === ',' && !inQuotes) {
+          row.push(current);
+          current = '';
+          continue;
+        }
+
+        if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && next === '\n') {
+            index += 1;
+          }
+          row.push(current);
+          rows.push(row);
+          row = [];
+          current = '';
+          continue;
+        }
+
+        current += char;
+      }
+
+      if (current.length > 0 || row.length > 0) {
+        row.push(current);
+        rows.push(row);
+      }
+
+      const headers = rows.shift().map((header) => header.replace(/^\uFEFF/, '').trim());
+      return rows
+        .filter((line) => line.length === headers.length)
+        .map((line) => Object.fromEntries(headers.map((header, index) => [header, line[index].trim()])));
+    }
+
+    function buildModel(rows) {
+      const cityMap = new Map();
+      const indicatorMap = new Map();
+      const savedPreferences = loadPreferences();
+
+      rows.forEach((row) => {
+        const indicatorName = row['INDICATORE'];
+        const cityName = row['DENOMINAZIONE CORRENTE'];
+        const rawNumber = parseItalianNumber(row['VALORE']);
+
+        if (!Number.isFinite(rawNumber)) {
+          return;
+        }
+
+        if (!cityMap.has(cityName)) {
+          cityMap.set(cityName, {
+            name: cityName,
+            provinceName: row['NOME PROVINCIA (ISTAT)'],
+            region: REGION_BY_CITY[cityName] || 'Regione non trovata',
+            values: new Map(),
+          });
+        }
+
+        if (!indicatorMap.has(indicatorName)) {
+          const saved = savedPreferences[indicatorName] || {};
+          indicatorMap.set(indicatorName, {
+            name: indicatorName,
+            unit: row["UNITA' DI MISURA"] || '',
+            year: row['ANNO DI RIFERIMENTO DEI DATI'] || '',
+            source: row['FONTE'] || '',
+            group: categorizeIndicator(indicatorName),
+            values: [],
+            ranks: new Map(),
+            preference: {
+              weight: clamp(Number(saved.weight ?? saved.manualWeight ?? 5), 0, 10),
+              manualWeight: clamp(Number(saved.manualWeight ?? saved.weight ?? 5), 0, 10),
+              favorite: Boolean(saved.favorite),
+            },
+          });
+        }
+
+        const indicator = indicatorMap.get(indicatorName);
+        indicator.ranks.set(cityName, indicator.values.length);
+        indicator.values.push(rawNumber);
+        cityMap.get(cityName).values.set(indicatorName, rawNumber);
+      });
+
+      state.cities = Array.from(cityMap.values()).sort((left, right) => left.name.localeCompare(right.name, 'it'));
+      state.indicators = Array.from(indicatorMap.values())
+        .map((indicator) => ({
+          ...indicator,
+          cityCount: indicator.values.length,
+        }))
+        .sort((left, right) => {
+          const groupCompare = GROUP_ORDER.indexOf(left.group) - GROUP_ORDER.indexOf(right.group);
+          return groupCompare || left.name.localeCompare(right.name, 'it');
+        });
+    }
+
+    function recompute() {
+      const activeIndicators = state.indicators.filter((indicator) => getEffectiveWeight(indicator) > 0);
+      elements.activeIndicatorsCount.textContent = String(activeIndicators.length);
+
+      if (!activeIndicators.length) {
+        elements.winnerName.textContent = '--';
+        elements.winnerSubtitle.textContent = 'Porta almeno uno slider sopra zero per generare una classifica personalizzata.';
+        elements.winnerScore.textContent = '--';
+        elements.winnerScoreLabel.textContent = 'Compatibilita non calcolabile';
+        elements.winnerTags.innerHTML = '';
+        elements.contributors.innerHTML = '<div class="empty-state">Nessun contributo disponibile finche tutti i pesi restano a zero.</div>';
+        elements.rankList.innerHTML = '<div class="empty-state">La classifica apparira qui appena attivi almeno un criterio.</div>';
+        return;
+      }
+
+      state.cityScores = state.cities
+        .map((city) => scoreCity(city, activeIndicators))
+        .sort((left, right) => right.score - left.score);
+
+      renderResults(activeIndicators);
+      persistPreferences();
+    }
+
+    function scoreCity(city, activeIndicators) {
+      let totalWeight = 0;
+      let weightedScore = 0;
+      const contributions = [];
+
+      activeIndicators.forEach((indicator) => {
+        const value = city.values.get(indicator.name);
+        const rank = indicator.ranks.get(city.name);
+        if (!Number.isFinite(value)) {
+          return;
+        }
+
+        const normalizedRank = indicator.cityCount <= 1 ? 1 : 1 - (rank / (indicator.cityCount - 1));
+        const effectiveWeight = getEffectiveWeight(indicator);
+        const contribution = normalizedRank * effectiveWeight;
+
+        totalWeight += effectiveWeight;
+        weightedScore += contribution;
+
+        contributions.push({
+          name: indicator.name,
+          value,
+          rank,
+          cityCount: indicator.cityCount,
+          unit: indicator.unit,
+          weight: effectiveWeight,
+          adjusted: normalizedRank,
+          contribution,
+        });
+      });
+
+      return {
+        city,
+        score: totalWeight ? weightedScore / totalWeight : 0,
+        totalWeight,
+        contributions: contributions.sort((left, right) => right.contribution - left.contribution),
+      };
+    }
+
+    function renderControls() {
+      const groups = new Map();
+      const savedGroupState = loadGroupState();
+
+      state.indicators.forEach((indicator) => {
+        if (!groups.has(indicator.group)) {
+          groups.set(indicator.group, []);
+        }
+        groups.get(indicator.group).push(indicator);
+      });
+
+      elements.groupList.innerHTML = '';
+
+      GROUP_ORDER.forEach((groupName, groupIndex) => {
+        const items = groups.get(groupName);
+        if (!items || !items.length) {
+          return;
+        }
+
+        const details = document.createElement('details');
+        details.className = 'group';
+        details.dataset.groupName = groupName;
+        details.open = Object.prototype.hasOwnProperty.call(savedGroupState, groupName)
+          ? savedGroupState[groupName]
+          : groupIndex < 3;
+        details.addEventListener('toggle', () => {
+          if (details.dataset.suspendStateWrite === 'true') {
+            return;
+          }
+          saveGroupState(groupName, details.open);
+        });
+
+        const summary = document.createElement('summary');
+        summary.className = 'collapse-toggle';
+        summary.innerHTML = `
+          <span>
+            <strong>${escapeHtml(groupName)}</strong>
+            <span class="group-meta">${items.length} indicatori</span>
+          </span>
+          <span class="badge">Apri o chiudi</span>
+        `;
+        details.appendChild(summary);
+
+        const list = document.createElement('div');
+        list.className = 'indicator-list';
+
+        items.forEach((indicator) => {
+          const card = document.createElement('article');
+          card.className = `indicator-card${indicator.preference.favorite ? ' favorite' : ''}`;
+          card.dataset.search = `${indicator.name} ${indicator.group} ${indicator.source} ${indicator.year}`.toLowerCase();
+          card.title = 'La classifica di questo indicatore segue l\'ordine migliore-peggiore del CSV originale.';
+
+          card.innerHTML = `
+            <div class="indicator-header">
+              <div>
+                <div class="indicator-title">${escapeHtml(indicator.name)}</div>
+                <div class="indicator-note">${escapeHtml(indicator.unit || 'Unita non specificata')} · ${escapeHtml(indicator.year || 'Anno non specificato')} · ${escapeHtml(indicator.source || 'Fonte non specificata')}</div>
+              </div>
+              <span class="weight-readout mono" data-weight-readout>${formatWeightReadout(indicator)}</span>
+              <button type="button" class="favorite-toggle${indicator.preference.favorite ? ' active' : ''}" data-favorite-toggle aria-label="Preferisci ${escapeHtml(indicator.name)}" aria-pressed="${indicator.preference.favorite ? 'true' : 'false'}" title="Blocca questo indicatore a 20 e mettilo in evidenza">${indicator.preference.favorite ? '★' : '☆'}</button>
+            </div>
+          `;
+
+          const slider = document.createElement('input');
+          slider.type = 'range';
+          slider.min = '0';
+          slider.max = '10';
+          slider.step = '1';
+          slider.value = String(indicator.preference.favorite ? 10 : indicator.preference.manualWeight);
+          slider.disabled = indicator.preference.favorite;
+          slider.classList.toggle('favorite-slider', indicator.preference.favorite);
+          slider.setAttribute('aria-label', `Peso per ${indicator.name}`);
+          updateSliderVisual(slider, indicator.preference.favorite ? 10 : indicator.preference.manualWeight);
+          slider.addEventListener('input', () => {
+            indicator.preference.weight = Number(slider.value);
+            indicator.preference.manualWeight = Number(slider.value);
+            card.querySelector('[data-weight-readout]').textContent = formatWeightReadout(indicator);
+            updateSliderVisual(slider, Number(slider.value));
+            recompute();
+          });
+          card.appendChild(slider);
+
+          const favoriteButton = card.querySelector('[data-favorite-toggle]');
+          favoriteButton.addEventListener('click', () => {
+            toggleFavoriteIndicator(indicator, card, slider, favoriteButton);
+          });
+
+          list.appendChild(card);
+        });
+
+        details.appendChild(list);
+        elements.groupList.appendChild(details);
+      });
+
+      applySearchFilter();
+    }
+
+    function renderResults(activeIndicators) {
+      const winner = state.cityScores[0];
+      if (!winner) {
+        return;
+      }
+
+      elements.winnerName.textContent = winner.city.name;
+      elements.winnerSubtitle.textContent = `Tra ${state.cities.length} citta, e la migliore combinazione rispetto ai ${activeIndicators.length} indicatori che hai lasciato attivi.`;
+      elements.winnerScore.textContent = `${Math.round(winner.score * 100)}%`;
+      elements.winnerScoreLabel.textContent = 'Media pesata delle posizioni nei ranking del CSV';
+      elements.winnerTags.innerHTML = [
+        `<span class="city-chip">Provincia ISTAT: ${escapeHtml(winner.city.provinceName)}</span>`,
+        renderRegionPill(winner.city.region),
+        `<span class="badge">Pesi attivi: ${activeIndicators.length}</span>`,
+      ].join('');
+
+      const topContributors = winner.contributions.slice(0, 6);
+      elements.contributors.innerHTML = topContributors.length
+        ? topContributors.map((item) => `
+            <article class="contributor">
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>
+                Valore ${formatNumber(item.value)} ${escapeHtml(item.unit || '')}<br>
+                Posizione ${item.rank + 1} su ${item.cityCount} · peso ${item.weight}/10 · impatto ${Math.round(item.adjusted * 100)}%
+              </small>
+            </article>
+          `).join('')
+        : '<div class="empty-state">Nessun contributo disponibile.</div>';
+
+      elements.rankList.innerHTML = state.cityScores.map((entry, index) => `
+        <article class="rank-item">
+          <div class="rank-head">
+            <div>
+              <span class="rank-name">${index + 1}. ${escapeHtml(entry.city.name)}</span>
+              <span class="rank-meta">Compatibilita ${Math.round(entry.score * 100)}%</span>
+            </div>
+            <div class="winner-stats">
+              ${renderRegionPill(entry.city.region)}
+              <span class="badge mono">${entry.score.toFixed(3)}</span>
+            </div>
+          </div>
+          <div class="rank-bar"><div class="rank-fill" style="width:${Math.max(4, entry.score * 100)}%"></div></div>
+        </article>
+      `).join('');
+    }
+
+    function applySearchFilter() {
+      const query = state.search;
+      const groups = elements.groupList.querySelectorAll('details.group');
+
+      groups.forEach((group) => {
+        let visibleCount = 0;
+        group.querySelectorAll('.indicator-card').forEach((card) => {
+          const visible = !query || card.dataset.search.includes(query);
+          card.classList.toggle('hidden', !visible);
+          if (visible) {
+            visibleCount += 1;
+          }
+        });
+        group.classList.toggle('hidden', visibleCount === 0);
+        if (query && visibleCount > 0) {
+          group.dataset.suspendStateWrite = 'true';
+          group.open = true;
+          queueMicrotask(() => {
+            delete group.dataset.suspendStateWrite;
+          });
+        }
+      });
+    }
+
+    function applyPresetWeight(weight) {
+      state.indicators.forEach((indicator) => {
+        indicator.preference.weight = weight;
+        indicator.preference.manualWeight = weight;
+      });
+      persistPreferences();
+      renderControls();
+      recompute();
+    }
+
+    function persistPreferences() {
+      const payload = Object.fromEntries(state.indicators.map((indicator) => [indicator.name, indicator.preference]));
+      try {
+        safeStorageSet(PREFS_KEY, JSON.stringify(payload));
+      } catch (error) {
+        console.warn('Impossibile salvare le preferenze', error);
+      }
+    }
+
+    function loadPreferences() {
+      try {
+        return JSON.parse(safeStorageGet(PREFS_KEY) || '{}');
+      } catch (error) {
+        console.warn('Preferenze non leggibili', error);
+        return {};
+      }
+    }
+
+    function toggleFavoriteIndicator(indicator, card, slider, favoriteButton) {
+      indicator.preference.favorite = !indicator.preference.favorite;
+      if (indicator.preference.favorite) {
+        indicator.preference.weight = 20;
+        slider.value = '10';
+      } else {
+        indicator.preference.weight = indicator.preference.manualWeight;
+        slider.value = String(indicator.preference.manualWeight);
+      }
+
+      card.classList.toggle('favorite', indicator.preference.favorite);
+      slider.disabled = indicator.preference.favorite;
+      slider.classList.toggle('favorite-slider', indicator.preference.favorite);
+      updateSliderVisual(slider, Number(slider.value));
+      card.querySelector('[data-weight-readout]').textContent = formatWeightReadout(indicator);
+      favoriteButton.classList.toggle('active', indicator.preference.favorite);
+      favoriteButton.textContent = indicator.preference.favorite ? '★' : '☆';
+      favoriteButton.setAttribute('aria-pressed', indicator.preference.favorite ? 'true' : 'false');
+      recompute();
+    }
+
+    function getEffectiveWeight(indicator) {
+      return indicator.preference.favorite ? 20 : indicator.preference.weight;
+    }
+
+    function formatWeightReadout(indicator) {
+      return `${getEffectiveWeight(indicator)}/10`;
+    }
+
+    function updateSliderVisual(slider, value) {
+      const normalized = Math.max(0, Math.min(10, Number(value) || 0));
+      slider.style.setProperty('--fill-percent', `${normalized * 10}%`);
+    }
+
+    function saveGroupState(groupName, isOpen) {
+      const currentState = loadGroupState();
+      currentState[groupName] = isOpen;
+      safeStorageSet(GROUP_STATE_KEY, JSON.stringify(currentState));
+    }
+
+    function loadGroupState() {
+      try {
+        return JSON.parse(safeStorageGet(GROUP_STATE_KEY) || '{}');
+      } catch (error) {
+        console.warn('Stato gruppi non leggibile', error);
+        return {};
+      }
+    }
+
+    function categorizeIndicator(name) {
+      const lowered = name.toLowerCase();
+      if (/(reddito|pil|retribuzione|depositi|export|imprese|startup|valore aggiunto|occupazione|disoccupazione|fallimento|cig)/.test(lowered)) {
+        return 'Economia e lavoro';
+      }
+      if (/(casa|stipendio per comprare casa|locazioni|affitti|beni durevoli|inflazione|sportelli bancari)/.test(lowered)) {
+        return 'Casa e costo della vita';
+      }
+      if (/(vita|ospedaliera|medici|pension|salute|mortal|welfare|anziani|bambini|giovani|donne)/.test(lowered)) {
+        return 'Salute e welfare';
+      }
+      if (/(aria|clima|alluvione|frana|ecosistema|rinnovabili|fotovoltaici|raccolta differenziata|aree protette|suolo|salubrita|illuminazione)/.test(lowered)) {
+        return 'Ambiente e territorio';
+      }
+      if (/(reat|furti|rapine|criminalita|insicurezza|litigios|cause|procedimenti|danneggiamenti|incidenti|truffe|stupefacenti|infortuni)/.test(lowered)) {
+        return 'Sicurezza e giustizia';
+      }
+      if (/(spettacoli|cultura|museale|librerie|lettura|sportivita|ristoranti|palestre|turistici|offerta culturale|sport)/.test(lowered)) {
+        return 'Cultura e tempo libero';
+      }
+      if (/(natalita|migratorio|immigrati|aire|laureati|diploma|studio|solitudine|demograf|amministratori comunali con meno di 40 anni)/.test(lowered)) {
+        return 'Demografia e societa';
+      }
+      if (/(comuni|servizi|riscossione|rete fissa|online|amministrazioni locali|pagamenti delle fatture|partecipazione elettorale|non profit)/.test(lowered)) {
+        return 'Istituzioni e servizi';
+      }
+      return 'Altro';
+    }
+
+    function parseItalianNumber(value) {
+      if (typeof value !== 'string') {
+        return Number(value);
+      }
+
+      const normalized = value.trim().replace(/\s+/g, '');
+      if (/^-?\d{1,3}(\.\d{3})+,\d+$/.test(normalized)) {
+        return Number(normalized.replace(/\./g, '').replace(',', '.'));
+      }
+      if (/^-?\d{1,3}(,\d{3})+\.\d+$/.test(normalized)) {
+        return Number(normalized.replace(/,/g, ''));
+      }
+      if (normalized.includes(',') && !normalized.includes('.')) {
+        return Number(normalized.replace(',', '.'));
+      }
+      return Number(normalized);
+    }
+
+    function safeStorageGet(key) {
+      try {
+        return localStorage.getItem(key);
+      } catch (error) {
+        console.warn('Storage non leggibile', error);
+        return null;
+      }
+    }
+
+    function safeStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch (error) {
+        console.warn('Storage non scrivibile', error);
+      }
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 2 }).format(value);
+    }
+
+    function formatRelativeTime(timestamp) {
+      if (!timestamp) {
+        return 'ora';
+      }
+      const elapsedHours = Math.max(0, Math.round((Date.now() - timestamp) / (60 * 60 * 1000)));
+      if (elapsedHours < 1) {
+        return 'meno di un ora fa';
+      }
+      if (elapsedHours === 1) {
+        return 'circa un ora fa';
+      }
+      return `${elapsedHours} ore fa`;
+    }
+
+    function extractYearFromUrl(url) {
+      const match = typeof url === 'string' ? url.match(/QDV(\d{4})/) : null;
+      return match ? Number(match[1]) : null;
+    }
+
+    function getFileNameFromUrl(url) {
+      if (typeof url !== 'string' || !url) {
+        return 'Link non disponibile';
+      }
+      const parts = url.split('/');
+      return parts[parts.length - 1] || url;
+    }
+
+    function renderRegionPill(region) {
+      const palette = getRegionPalette(region);
+      return `<span class="badge" style="background:${palette.background}; color:${palette.foreground}; border-color:${palette.border};">${escapeHtml(region)}</span>`;
+    }
+
+    function getRegionPalette(region) {
+      const index = Math.max(0, REGIONS.indexOf(region));
+      const hue = (index * 37) % 360;
+      return {
+        background: `hsl(${hue} 82% 92%)`,
+        foreground: `hsl(${hue} 58% 28%)`,
+        border: `hsl(${hue} 50% 72%)`,
+      };
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
